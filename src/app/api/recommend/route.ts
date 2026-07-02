@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getModelsFromHF } from "@/lib/huggingface";
-import { getVramForExactName, knownModelNames } from "@/lib/modelVramMap";
+import { getVramForModel } from "@/lib/modelVramMap";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         const hfModels = await getModelsFromHF();
 
         for (const hf of hfModels) {
-          const vramInfo = getVramForExactName(hf.name);
+          const vramInfo = getVramForModel(hf.slug);
           const existing = await prisma.model.findUnique({ where: { slug: hf.slug } });
 
           const data = {
