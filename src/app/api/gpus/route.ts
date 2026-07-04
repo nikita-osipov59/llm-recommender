@@ -34,14 +34,17 @@ export async function GET(req: Request) {
     const force = url.searchParams.get("refresh") === "1";
 
     if (force) {
-      await refreshGpuDatabase();
+      await prisma.gpu.deleteMany({ where: { vendor: { not: "Apple" } } });
     }
 
+    const gpus = await getGpus();
     await seedAppleGpus();
 
-    const gpus = await getGpus();
+    const allGpus = await prisma.gpu.findMany({
+      orderBy: [{ vendor: "asc" }, { vramGb: "desc" }],
+    });
 
-    return NextResponse.json({ gpus });
+    return NextResponse.json({ gpus: allGpus });
   } catch (err) {
     console.error("/api/gpus error:", err);
     return NextResponse.json(

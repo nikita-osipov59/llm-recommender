@@ -28,6 +28,16 @@ function parseCsvLine(line: string): string[] {
   return result;
 }
 
+function parseMemoryGb(raw: string): number {
+  const cleaned = raw.replace(/[^0-9.]/g, "");
+  const num = parseFloat(cleaned);
+  if (Number.isNaN(num)) return 0;
+  if (raw.toUpperCase().includes("MB") || num > 100) {
+    return Math.round((num / 1024) * 10) / 10;
+  }
+  return Math.round(num * 10) / 10;
+}
+
 function normalizeVendor(raw: string): string {
   const v = raw.toLowerCase();
   if (v.includes("nvidia")) return "NVIDIA";
@@ -69,18 +79,17 @@ function parseGpuCsv(text: string): GpuEntry[] {
     const name = cols[nameIdx]?.trim();
     if (!name || name === "-" || name === "N/A") continue;
 
-    let vramMb = parseFloat(cols[memoryIdx]?.replace(/[^0-9.]/g, "") || "0");
-    if (vramMb > 10000) vramMb = vramMb / 1024;
-    if (Number.isNaN(vramMb) || vramMb < MIN_VRAM) continue;
+    const vramGb = parseMemoryGb(cols[memoryIdx] || "");
+    if (vramGb === 0 || vramGb < MIN_VRAM) continue;
 
     if (yearIdx !== -1) {
       const yearStr = cols[yearIdx]?.trim() || "";
-      const year = parseInt(yearStr);
+      const yearMatch = yearStr.match(/(\d{4})/);
+      const year = yearMatch ? parseInt(yearMatch[1]) : NaN;
       if (!Number.isNaN(year) && year < MIN_RELEASE_YEAR) continue;
     }
 
     const vendor = brandIdx !== -1 ? normalizeVendor(cols[brandIdx]?.trim() || "Unknown") : "Unknown";
-    const vramGb = Math.round(vramMb * 10) / 10;
     const key = `${vendor} ${name}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -110,9 +119,11 @@ export async function refreshGpuDatabase(): Promise<GpuEntry[]> {
 }
 
 export async function getGpus(): Promise<GpuEntry[]> {
-  const fromDb = await prisma.gpu.findMany({ orderBy: [{ vendor: "asc" }, { vramGb: "desc" }] });
+  const nonAppleCount = await prisma.gpu.count({ where: { vendor: { not: "Apple" } } });
 
-  if (fromDb.length > 0) return fromDb;
+  if (nonAppleCount === 0) {
+    await refreshGpuDatabase();
+  }
 
-  return refreshGpuDatabase();
+  return prisma.gpu.findMany({ orderBy: [{ vendor: "asc" }, { vramGb: "desc" }] });
 }
