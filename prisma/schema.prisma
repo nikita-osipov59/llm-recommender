@@ -24,3 +24,11 @@ model Model {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Gpu {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  vramGb    Float
+  vendor    String
+  createdAt DateTime @default(now())
+}

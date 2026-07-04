@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getModelsFromHF } from "@/lib/huggingface";
-import { getVramForModel } from "@/lib/modelVramMap";
+import { estimateVram } from "@/lib/vramCalculator";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         const hfModels = await getModelsFromHF();
 
         for (const hf of hfModels) {
-          const vramInfo = getVramForModel(hf.slug);
+          const vramEst = estimateVram(hf.parameters);
           const existing = await prisma.model.findUnique({ where: { slug: hf.slug } });
 
           const data = {
@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
             provider: hf.provider,
             description: hf.description || null,
             parameters: hf.parameters,
-            vramQ4: vramInfo?.vramQ4 ?? null,
-            vramQ8: vramInfo?.vramQ8 ?? null,
-            ramMin: vramInfo?.ramMin ?? null,
+            vramQ4: vramEst.vramQ4,
+            vramQ8: vramEst.vramQ8,
+            ramMin: vramEst.ramMin,
             cpuRec: null,
             hfUrl: hf.hfUrl,
             downloads: hf.downloads,
