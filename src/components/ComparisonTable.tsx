@@ -11,7 +11,17 @@ interface ModelData {
   hfUrl: string | null;
   downloads: number;
   description: string | null;
+  tags?: string | null;
 }
+
+const TAG_LABELS: Record<string, string> = {
+  instruct: "Чат",
+  code: "Код",
+  vision: "Зрение",
+  reasoning: "Рассуждение",
+  math: "Математика",
+  base: "Базовая",
+};
 
 interface ComparisonTableProps {
   models: ModelData[];
@@ -50,12 +60,24 @@ export default function ComparisonTable({ models, onClose }: ComparisonTableProp
           </thead>
           <tbody>
             <Row label="Провайдер" values={models.map((m) => m.provider)} />
-            <Row label="Параметры" values={models.map((m) => `${m.parameters}B`)} />
-            <Row label="VRAM (Q4)" values={models.map((m) => m.vramQ4 ? `${m.vramQ4} ГБ` : "—")} />
-            <Row label="VRAM (Q8)" values={models.map((m) => m.vramQ8 ? `${m.vramQ8} ГБ` : "—")} />
-            <Row label="RAM мин." values={models.map((m) => m.ramMin ? `${m.ramMin} ГБ` : "—")} />
-            <Row label="Загрузки" values={models.map((m) => `${(m.downloads / 1000).toFixed(0)}K`)} />
-            <Row label="HuggingFace" values={models.map((m) => m.hfUrl ? "Открыть" : "—")} isLink urls={models.map((m) => m.hfUrl)} />
+            <Row label="Параметры" values={models.map((m) => `${m.parameters}B`)}
+                  numericValues={models.map((m) => m.parameters)} />
+            <Row label="VRAM (Q4)" values={models.map((m) => m.vramQ4 ? `${m.vramQ4} ГБ` : "—")}
+                  numericValues={models.map((m) => m.vramQ4)} lowerIsBetter />
+            <Row label="VRAM (Q8)" values={models.map((m) => m.vramQ8 ? `${m.vramQ8} ГБ` : "—")}
+                  numericValues={models.map((m) => m.vramQ8)} lowerIsBetter />
+            <Row label="RAM мин." values={models.map((m) => m.ramMin ? `${m.ramMin} ГБ` : "—")}
+                  numericValues={models.map((m) => m.ramMin)} lowerIsBetter />
+            <Row label="Загрузки" values={models.map((m) => `${(m.downloads / 1000).toFixed(0)}K`)}
+                  numericValues={models.map((m) => m.downloads)} />
+            <Row label="HuggingFace" values={models.map((m) => m.hfUrl ? "Открыть" : "—")}
+                  isLink urls={models.map((m) => m.hfUrl)} />
+            <Row label="Теги" values={models.map((m) => {
+              const tags = m.tags?.split(",").filter(Boolean) ?? [];
+              return tags.length > 0
+                ? tags.map((t) => TAG_LABELS[t.trim()] || t.trim()).join(", ")
+                : "—";
+            })} />
           </tbody>
         </table>
       </div>
@@ -63,27 +85,61 @@ export default function ComparisonTable({ models, onClose }: ComparisonTableProp
   );
 }
 
-function Row({ label, values, isLink, urls }: {
+function Row({ label, values, isLink, urls, numericValues, lowerIsBetter }: {
   label: string;
   values: string[];
   isLink?: boolean;
   urls?: (string | null)[];
+  numericValues?: (number | null)[];
+  lowerIsBetter?: boolean;
 }) {
   const allMatch = new Set(values).size === 1;
+
+  let bestIndices: Set<number> = new Set();
+  let worstIndices: Set<number> = new Set();
+
+  if (!allMatch && numericValues && numericValues.length >= 2) {
+    const valid = numericValues
+      .map((v, i) => ({ val: v, idx: i }))
+      .filter((x) => x.val !== null);
+
+    if (valid.length >= 2) {
+      const sorted = [...valid].sort((a, b) =>
+        lowerIsBetter ? a.val! - b.val! : b.val! - a.val!
+      );
+      const bestVal = sorted[0].val;
+      const worstVal = sorted[sorted.length - 1].val;
+
+      if (bestVal !== worstVal) {
+        bestIndices = new Set(valid.filter((x) => x.val === bestVal).map((x) => x.idx));
+        worstIndices = new Set(valid.filter((x) => x.val === worstVal).map((x) => x.idx));
+      }
+    }
+  }
+
+  const rowBg = allMatch
+    ? "bg-green-50 dark:bg-green-900/20 even:bg-green-50 dark:even:bg-green-900/20"
+    : "";
+
   return (
-    <tr className={`border-b dark:border-gray-700 even:bg-gray-50 dark:even:bg-gray-800/50 ${allMatch ? "bg-green-50 dark:bg-green-900/20 even:bg-green-50 dark:even:bg-green-900/20" : ""}`}>
+    <tr className={`border-b dark:border-gray-700 even:bg-gray-50 dark:even:bg-gray-800/50 ${rowBg}`}>
       <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-medium">{label}</td>
-      {values.map((val, i) => (
-        <td key={i} className="px-4 py-2">
-          {isLink && urls?.[i] ? (
-            <a href={urls[i]!} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-              {val}
-            </a>
-          ) : (
-            val
-          )}
-        </td>
-      ))}
+      {values.map((val, i) => {
+        let cellClass = "px-4 py-2";
+        if (bestIndices.has(i)) cellClass += " bg-green-100 dark:bg-green-900";
+        else if (worstIndices.has(i)) cellClass += " bg-red-100 dark:bg-red-900";
+        return (
+          <td key={i} className={cellClass}>
+            {isLink && urls?.[i] ? (
+              <a href={urls[i]!} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                {val}
+              </a>
+            ) : (
+              val
+            )}
+          </td>
+        );
+      })}
     </tr>
   );
 }
