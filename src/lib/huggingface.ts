@@ -13,10 +13,11 @@ function inferTags(id: string): string[] {
   const n = id.toLowerCase();
   const tags: string[] = [];
   if (/\b(instruct|chat)\b/.test(n)) tags.push("instruct");
-  if (/\bcode\b/.test(n)) tags.push("coding");
+  if (/\bcode\b/.test(n)) tags.push("code");
   if (/\bvision\b/.test(n)) tags.push("vision");
   if (/\breasoning\b/.test(n)) tags.push("reasoning");
   if (/\bmath\b/.test(n)) tags.push("math");
+  if (tags.length === 0) tags.push("base");
   return tags;
 }
 

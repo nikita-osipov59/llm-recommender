@@ -82,7 +82,7 @@ export default function ModelCard({ model, selected, onToggle, userVram, isBest,
         <div className="flex gap-1 mt-2 flex-wrap">
           {tags.map((tag) => (
             <span key={tag} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
-              {tag === "coding" ? "кодинг" : tag}
+              {tag}
             </span>
           ))}
         </div>

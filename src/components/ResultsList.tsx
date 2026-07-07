@@ -210,7 +210,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
-                {tag === "coding" ? "Кодинг" : tag.charAt(0).toUpperCase() + tag.slice(1)}
+                {tag.charAt(0).toUpperCase() + tag.slice(1)}
               </button>
             ))}
             <button
