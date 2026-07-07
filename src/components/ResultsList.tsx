@@ -222,7 +222,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
-              <Bookmark size={14} className="inline fill-yellow-400" /> {favorites.size}
+              <Bookmark size={14} className="inline text-yellow-400" /> {favorites.size}
             </button>
           </div>
         )}
