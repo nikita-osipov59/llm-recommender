@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import HardwareForm from "@/components/HardwareForm";
 import ResultsList from "@/components/ResultsList";
 import ScrollToTop from "@/components/ScrollToTop";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface ModelData {
   slug: string;
@@ -118,11 +119,14 @@ export default function Home() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">LLM Recommender</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Подберите локальную модель под ваше железо
-        </p>
+      <header className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">LLM Recommender</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Подберите локальную модель под ваше железо
+          </p>
+        </div>
+        <ThemeToggle />
       </header>
 
       <section className="mb-8">
