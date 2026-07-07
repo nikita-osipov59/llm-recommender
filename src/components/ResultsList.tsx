@@ -37,6 +37,12 @@ const SORT_LABELS: Record<SortKey, string> = { parameters: "По парамет�
 
 const PAGE_SIZE = 20;
 const FAV_KEY = "llm-recommender-favorites";
+const CATEGORY_MAP: Record<string, string> = {
+  Чат: "instruct",
+  Код: "code",
+  Зрение: "vision",
+  Рассуждение: "reasoning",
+};
 
 function loadFavorites(): Set<string> {
   try {
@@ -53,20 +59,12 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
   const [sortKey, setSortKey] = useState<SortKey>("parameters");
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [favorites, setFavorites] = useState<Set<string>>(loadFavorites);
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(FAV_KEY, JSON.stringify([...favorites]));
   }, [favorites]);
-
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    for (const m of models) {
-      if (m.tags) m.tags.split(",").forEach((t) => tags.add(t));
-    }
-    return [...tags].sort();
-  }, [models]);
 
   const bestModel = useMemo(() => {
     return models.reduce((best, m) => (m.parameters > (best?.parameters ?? 0) ? m : best), null as ModelData | null);
@@ -76,13 +74,16 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
     let result = models.filter((m) =>
       m.name.toLowerCase().includes(search.toLowerCase())
     );
-    if (tagFilter) result = result.filter((m) => m.tags?.includes(tagFilter));
+    if (categoryFilter) {
+      const tag = CATEGORY_MAP[categoryFilter];
+      result = result.filter((m) => m.tags?.includes(tag));
+    }
     if (showFavorites) result = result.filter((m) => favorites.has(m.slug));
     if (quantFilter === "q4") result = result.filter((m) => m.vramQ4 !== null);
     if (quantFilter === "q8") result = result.filter((m) => m.vramQ8 !== null);
     result.sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0));
     return result;
-  }, [models, search, quantFilter, sortKey, tagFilter, showFavorites, favorites]);
+  }, [models, search, quantFilter, sortKey, categoryFilter, showFavorites, favorites]);
 
   const visible = useMemo(() => filtered.slice(0, displayCount), [filtered, displayCount]);
 
@@ -90,15 +91,15 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
   function handleQuantFilter(value: QuantFilter) { setQuantFilter(value); setDisplayCount(PAGE_SIZE); }
   function handleSortKey(value: SortKey) { setSortKey(value); setDisplayCount(PAGE_SIZE); }
 
-  function selectTag(tag: string | null) {
-    setTagFilter(tag);
+  function selectCategory(cat: string | null) {
+    setCategoryFilter(cat);
     setShowFavorites(false);
     setDisplayCount(PAGE_SIZE);
   }
 
   function selectFavorites() {
     setShowFavorites(true);
-    setTagFilter(null);
+    setCategoryFilter(null);
     setDisplayCount(PAGE_SIZE);
   }
 
@@ -189,29 +190,29 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
             <option key={key} value={key}>{SORT_LABELS[key]}</option>
           ))}
         </select>
-        {allTags.length > 0 && (
+        {Object.keys(CATEGORY_MAP).length > 0 && (
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
-              onClick={() => selectTag(null)}
+              onClick={() => selectCategory(null)}
               className={`text-sm px-3 py-1 rounded-md transition cursor-pointer ${
-                !tagFilter && !showFavorites
+                !categoryFilter && !showFavorites
                   ? "bg-white dark:bg-gray-600 shadow-sm font-medium"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               Все
             </button>
-            {allTags.map((tag) => (
+            {Object.keys(CATEGORY_MAP).map((cat) => (
               <button
-                key={tag}
-                onClick={() => selectTag(tag)}
+                key={cat}
+                onClick={() => selectCategory(cat)}
                 className={`text-sm px-3 py-1 rounded-md transition cursor-pointer ${
-                  tagFilter === tag
+                  categoryFilter === cat
                     ? "bg-white dark:bg-gray-600 shadow-sm font-medium"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
-                {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                {cat}
               </button>
             ))}
             <button
