@@ -12,7 +12,7 @@ export interface HFModelResult {
 function inferTags(id: string): string[] {
   const n = id.toLowerCase();
   const tags: string[] = [];
-  if (/\b(instruct|chat)\b/.test(n)) tags.push("chat");
+  if (/\b(instruct|chat)\b/.test(n)) tags.push("instruct");
   if (/\bcode\b/.test(n)) tags.push("coding");
   if (/\bvision\b/.test(n)) tags.push("vision");
   if (/\breasoning\b/.test(n)) tags.push("reasoning");
