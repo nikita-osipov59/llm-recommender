@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import ModelCard from "./ModelCard";
-import ComparisonTable from "./ComparisonTable";
 
 interface ModelData {
   slug: string;
@@ -24,8 +24,8 @@ interface Props {
 }
 
 export default function ResultsList({ models, loading, error }: Props) {
+  const router = useRouter();
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
-  const [showComparison, setShowComparison] = useState(false);
 
   const handleToggle = (slug: string) => {
     setSelectedSlugs((prev) => {
@@ -37,7 +37,6 @@ export default function ResultsList({ models, loading, error }: Props) {
       }
       return next;
     });
-    setShowComparison(false);
   };
 
   if (loading) {
@@ -72,9 +71,11 @@ export default function ResultsList({ models, loading, error }: Props) {
         <p className="text-sm text-gray-500">
           Найдено моделей: {models.length}
         </p>
-        {selectedSlugs.size >= 2 && !showComparison && (
+        {selectedSlugs.size >= 2 && (
           <button
-            onClick={() => setShowComparison(true)}
+            onClick={() =>
+              router.push("/compare?slugs=" + [...selectedSlugs].join(","))
+            }
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition"
           >
             Сравнить ({selectedSlugs.size})
@@ -90,13 +91,6 @@ export default function ResultsList({ models, loading, error }: Props) {
           onToggle={handleToggle}
         />
       ))}
-
-      {showComparison && selectedSlugs.size >= 2 && (
-        <ComparisonTable
-          models={models.filter((m) => selectedSlugs.has(m.slug))}
-          onClose={() => setShowComparison(false)}
-        />
-      )}
     </div>
   );
 }
