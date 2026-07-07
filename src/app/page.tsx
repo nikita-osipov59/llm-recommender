@@ -33,6 +33,7 @@ interface SessionState {
   formVram: string;
   formRam: string;
   formCpu: string;
+  formVendor: string;
 }
 
 const STORAGE_KEY = "llm-recommender-search";
@@ -57,6 +58,7 @@ export default function Home() {
   const [formVram, setFormVram] = useState(initial?.formVram ?? "");
   const [formRam, setFormRam] = useState(initial?.formRam ?? "");
   const [formCpu, setFormCpu] = useState(initial?.formCpu ?? "");
+  const [formVendor, setFormVendor] = useState(initial?.formVendor ?? "");
 
   useEffect(() => {
     const state: SessionState = {
@@ -67,9 +69,10 @@ export default function Home() {
       formVram,
       formRam,
       formCpu,
+      formVendor,
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [models, selectedSlugs, hasSearched, formGpu, formVram, formRam, formCpu]);
+  }, [models, selectedSlugs, hasSearched, formGpu, formVram, formRam, formCpu, formVendor]);
 
   const handleToggle = useCallback((slug: string) => {
     setSelectedSlugs((prev) => {
@@ -80,11 +83,12 @@ export default function Home() {
     });
   }, []);
 
-  const handleFormChange = useCallback((v: { gpu: string; vram: string; ram: string; cpu: string }) => {
+  const handleFormChange = useCallback((v: { gpu: string; vram: string; ram: string; cpu: string; vendor: string }) => {
     setFormGpu(v.gpu);
     setFormVram(v.vram);
     setFormRam(v.ram);
     setFormCpu(v.cpu);
+    setFormVendor(v.vendor);
   }, []);
 
   const handleRecommend = async (spec: HardwareSpec) => {
@@ -127,7 +131,7 @@ export default function Home() {
         <HardwareForm
           onRecommend={handleRecommend}
           loading={loading}
-          formValues={{ gpu: formGpu, vram: formVram, ram: formRam, cpu: formCpu }}
+          formValues={{ gpu: formGpu, vram: formVram, ram: formRam, cpu: formCpu, vendor: formVendor }}
           onFormChange={handleFormChange}
         />
       </section>

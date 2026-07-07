@@ -20,6 +20,7 @@ interface FormValues {
   vram: string;
   ram: string;
   cpu: string;
+  vendor: string;
 }
 
 interface Props {
@@ -42,6 +43,22 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
       .catch(() => {})
       .finally(() => setGpusLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (formValues.gpu && !formValues.vendor && gpus.length > 0) {
+      const gpuData = gpus.find((g) => `${g.vendor} ${g.name}` === formValues.gpu);
+      if (gpuData) {
+        onFormChange({ ...formValues, vendor: gpuData.vendor });
+      }
+    }
+  }, [gpus]);
+
+  const vendors = [...new Set(gpus.map((g) => g.vendor))].sort();
+  const showVendorSelect = vendors.length > 1;
+  const filteredGpus = formValues.vendor
+    ? gpus.filter((g) => g.vendor === formValues.vendor)
+    : gpus;
+  const gpuDisabled = gpusLoading || (showVendorSelect && !formValues.vendor);
 
   const handleGpuChange = (value: string) => {
     const gpuData = gpus.find((g) => `${g.vendor} ${g.name}` === value);
@@ -66,18 +83,33 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {showVendorSelect && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Производитель</label>
+          <select
+            value={formValues.vendor}
+            onChange={(e) => onFormChange({ ...formValues, vendor: e.target.value, gpu: "" })}
+            className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
+          >
+            <option value="">— выберите производителя —</option>
+            {vendors.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium mb-1">Видеокарта (GPU)</label>
         <select
           value={formValues.gpu}
           onChange={(e) => handleGpuChange(e.target.value)}
           className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
-          disabled={gpusLoading}
+          disabled={gpuDisabled}
         >
           <option value="">
-            {gpusLoading ? "Загрузка..." : "— выберите GPU —"}
+            {gpusLoading ? "Загрузка..." : showVendorSelect && !formValues.vendor ? "Сначала выберите производителя" : "— выберите GPU —"}
           </option>
-          {gpus.map((g) => {
+          {filteredGpus.map((g) => {
             const label = `${g.vendor} ${g.name} (${g.vramGb}GB)`;
             return (
               <option key={label} value={label}>
@@ -96,8 +128,9 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
           type="number"
           value={formValues.vram}
           onChange={(e) => onFormChange({ ...formValues, vram: e.target.value })}
+          readOnly={!!formValues.gpu}
           placeholder="Например: 16"
-          className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
+          className={`w-full border rounded-lg p-2 dark:border-gray-700 ${formValues.gpu ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : "dark:bg-gray-800"}`}
           required
           min="1"
           step="0.1"
@@ -140,7 +173,7 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
         </button>
         <button
           type="button"
-          onClick={() => onFormChange({ gpu: "", vram: "", ram: "", cpu: "" })}
+          onClick={() => onFormChange({ gpu: "", vram: "", ram: "", cpu: "", vendor: "" })}
           disabled={loading}
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
         >
