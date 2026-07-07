@@ -22,7 +22,6 @@ interface HardwareSpec {
   gpu: string;
   vram: number;
   ram: number;
-  cpu: string;
 }
 
 interface SessionState {
@@ -32,7 +31,6 @@ interface SessionState {
   formGpu: string;
   formVram: string;
   formRam: string;
-  formCpu: string;
   formVendor: string;
 }
 
@@ -60,7 +58,6 @@ export default function Home() {
   const [formGpu, setFormGpu] = useState(initial?.formGpu ?? "");
   const [formVram, setFormVram] = useState(initial?.formVram ?? "");
   const [formRam, setFormRam] = useState(initial?.formRam ?? "");
-  const [formCpu, setFormCpu] = useState(initial?.formCpu ?? "");
   const [formVendor, setFormVendor] = useState(initial?.formVendor ?? "");
 
   useEffect(() => {
@@ -71,11 +68,10 @@ export default function Home() {
       formGpu,
       formVram,
       formRam,
-      formCpu,
       formVendor,
     };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [models, selectedSlugs, hasSearched, formGpu, formVram, formRam, formCpu, formVendor]);
+  }, [models, selectedSlugs, hasSearched, formGpu, formVram, formRam, formVendor]);
 
   const handleToggle = useCallback((slug: string) => {
     setSelectedSlugs((prev) => {
@@ -86,11 +82,10 @@ export default function Home() {
     });
   }, []);
 
-  const handleFormChange = useCallback((v: { gpu: string; vram: string; ram: string; cpu: string; vendor: string }) => {
+  const handleFormChange = useCallback((v: { gpu: string; vram: string; ram: string; vendor: string }) => {
     setFormGpu(v.gpu);
     setFormVram(v.vram);
     setFormRam(v.ram);
-    setFormCpu(v.cpu);
     setFormVendor(v.vendor);
   }, []);
 
@@ -134,7 +129,7 @@ export default function Home() {
         <HardwareForm
           onRecommend={handleRecommend}
           loading={loading}
-          formValues={{ gpu: formGpu, vram: formVram, ram: formRam, cpu: formCpu, vendor: formVendor }}
+          formValues={{ gpu: formGpu, vram: formVram, ram: formRam, vendor: formVendor }}
           onFormChange={handleFormChange}
         />
       </section>

@@ -12,14 +12,12 @@ interface HardwareSpec {
   gpu: string;
   vram: number;
   ram: number;
-  cpu: string;
 }
 
 interface FormValues {
   gpu: string;
   vram: string;
   ram: string;
-  cpu: string;
   vendor: string;
 }
 
@@ -80,7 +78,6 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
       gpu: formValues.gpu,
       vram: Number(formValues.vram) || 0,
       ram: Number(formValues.ram) || 0,
-      cpu: formValues.cpu,
     });
   };
 
@@ -155,17 +152,6 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Процессор (CPU) — необязательно</label>
-        <input
-          type="text"
-          value={formValues.cpu}
-          onChange={(e) => onFormChange({ ...formValues, cpu: e.target.value })}
-          placeholder="Например: Ryzen 7 9800X3D"
-          className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
-        />
-      </div>
-
       <div className="flex gap-2">
         <button
           type="submit"
@@ -176,7 +162,7 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
         </button>
         <button
           type="button"
-          onClick={() => onFormChange({ gpu: "", vram: "", ram: "", cpu: "", vendor: "" })}
+          onClick={() => onFormChange({ gpu: "", vram: "", ram: "", vendor: "" })}
           disabled={loading}
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
         >

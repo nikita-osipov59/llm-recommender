@@ -10,8 +10,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const vram = Number(body.vram) || 0;
     const ram = Number(body.ram) || 0;
-    const gpu = String(body.gpu || "");
-    const cpu = String(body.cpu || "");
 
     if (!vram && !ram) {
       return NextResponse.json(
