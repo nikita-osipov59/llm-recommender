@@ -92,7 +92,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
   function handleSortKey(value: SortKey) { setSortKey(value); setDisplayCount(PAGE_SIZE); }
 
   function selectCategory(cat: string | null) {
-    setCategoryFilter(cat);
+    setCategoryFilter(prev => prev === cat ? null : cat);
     setShowFavorites(false);
     setDisplayCount(PAGE_SIZE);
   }

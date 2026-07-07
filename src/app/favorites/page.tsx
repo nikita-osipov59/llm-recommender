@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import ModelCard from "@/components/ModelCard";
@@ -42,6 +42,8 @@ export default function FavoritesPage() {
   const [favs, setFavs] = useState<Set<string>>(loadFavorites);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [quantFilter, setQuantFilter] = useState<"all" | "q4" | "q8">("all");
+  const [sortKey, setSortKey] = useState<"parameters" | "vramQ4" | "downloads">("parameters");
 
   useEffect(() => {
     const slugs = [...favs];
@@ -72,14 +74,20 @@ export default function FavoritesPage() {
     setModels((prev) => prev.filter((m) => m.slug !== slug));
   }
 
-  const filtered = models.filter((m) => {
-    if (!m.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (categoryFilter) {
-      const tag = CATEGORY_MAP[categoryFilter];
-      if (!m.tags?.includes(tag)) return false;
-    }
-    return true;
-  });
+  const filtered = useMemo(() => {
+    let result = models.filter((m) => {
+      if (!m.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (categoryFilter) {
+        const tag = CATEGORY_MAP[categoryFilter];
+        if (!m.tags?.includes(tag)) return false;
+      }
+      return true;
+    });
+    if (quantFilter === "q4") result = result.filter((m) => m.vramQ4 !== null);
+    if (quantFilter === "q8") result = result.filter((m) => m.vramQ8 !== null);
+    result.sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0));
+    return result;
+  }, [models, search, categoryFilter, quantFilter, sortKey]);
 
   const loadingContent = (
     <div className="space-y-3">
@@ -150,6 +158,33 @@ export default function FavoritesPage() {
                 {cat}
               </button>
             ))}
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap mb-4">
+            <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              {(["all", "q4", "q8"] as const).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setQuantFilter(key)}
+                  className={`text-sm px-3 py-1 rounded-md transition cursor-pointer ${
+                    quantFilter === key
+                      ? "bg-white dark:bg-gray-600 shadow-sm font-medium"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  }`}
+                >
+                  {{ all: "Все", q4: "Q4", q8: "Q8" }[key]}
+                </button>
+              ))}
+            </div>
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              className="text-sm border rounded-lg p-1.5 dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
+            >
+              <option value="parameters">По параметрам</option>
+              <option value="vramQ4">По VRAM (Q4)</option>
+              <option value="downloads">По загрузкам</option>
+            </select>
           </div>
 
           {filtered.map((model) => (
