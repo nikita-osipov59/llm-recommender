@@ -1,5 +1,5 @@
 import { PrismaClient } from "../src/generated/prisma/client.js";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const APPLE_GPUS = [
   { name: "Apple M1 (7 GPU cores)", vramGb: 7, vendor: "Apple" },
@@ -21,7 +21,7 @@ const CSV_URL =
   "https://raw.githubusercontent.com/RonnyMuthomi/GPUs-Specs/main/gpu_1986-2026.csv";
 
 async function main() {
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
   const prisma = new PrismaClient({ adapter });
 
   // Seed Apple GPUs
