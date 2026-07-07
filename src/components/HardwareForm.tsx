@@ -15,18 +15,36 @@ interface HardwareSpec {
   cpu: string;
 }
 
+interface FormValues {
+  gpu: string;
+  vram: string;
+  ram: string;
+  cpu: string;
+}
+
 interface Props {
   onRecommend: (spec: HardwareSpec) => void;
   loading: boolean;
+  initialValues?: FormValues;
+  onFormChange?: (values: FormValues) => void;
 }
 
-export default function HardwareForm({ onRecommend, loading }: Props) {
+export default function HardwareForm({ onRecommend, loading, initialValues, onFormChange }: Props) {
   const [gpus, setGpus] = useState<GpuEntry[]>([]);
   const [gpusLoading, setGpusLoading] = useState(true);
   const [gpu, setGpu] = useState("");
   const [vram, setVram] = useState("");
   const [ram, setRam] = useState("");
   const [cpu, setCpu] = useState("");
+
+  useEffect(() => {
+    if (initialValues) {
+      setGpu(initialValues.gpu);
+      setVram(initialValues.vram);
+      setRam(initialValues.ram);
+      setCpu(initialValues.cpu);
+    }
+  }, []);
 
   useEffect(() => {
     fetch("/api/gpus")
@@ -37,6 +55,10 @@ export default function HardwareForm({ onRecommend, loading }: Props) {
       .catch(() => {})
       .finally(() => setGpusLoading(false));
   }, []);
+
+  useEffect(() => {
+    onFormChange?.({ gpu, vram: vram || "", ram: ram || "", cpu });
+  }, [gpu, vram, ram, cpu, onFormChange]);
 
   const handleGpuChange = (value: string) => {
     setGpu(value);
