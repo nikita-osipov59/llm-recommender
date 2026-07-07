@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import HardwareForm from "@/components/HardwareForm";
 import ResultsList from "@/components/ResultsList";
 
@@ -24,16 +24,57 @@ interface HardwareSpec {
   cpu: string;
 }
 
+interface SessionState {
+  models: ModelData[];
+  selectedSlugs: string[];
+  hasSearched: boolean;
+}
+
+const STORAGE_KEY = "llm-recommender-search";
+
 export default function Home() {
   const [models, setModels] = useState<ModelData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved: SessionState = JSON.parse(raw);
+        setModels(saved.models);
+        setSelectedSlugs(new Set(saved.selectedSlugs));
+        setHasSearched(saved.hasSearched);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!hasSearched) return;
+    const state: SessionState = {
+      models,
+      selectedSlugs: [...selectedSlugs],
+      hasSearched,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [models, selectedSlugs, hasSearched]);
+
+  const handleToggle = useCallback((slug: string) => {
+    setSelectedSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }, []);
 
   const handleRecommend = async (spec: HardwareSpec) => {
     setLoading(true);
     setError(undefined);
     setHasSearched(true);
+    setSelectedSlugs(new Set());
 
     try {
       const res = await fetch("/api/recommend", {
@@ -71,7 +112,13 @@ export default function Home() {
 
       <section>
         {hasSearched && (
-          <ResultsList models={models} loading={loading} error={error} />
+          <ResultsList
+            models={models}
+            loading={loading}
+            error={error}
+            selectedSlugs={selectedSlugs}
+            onToggle={handleToggle}
+          />
         )}
       </section>
     </main>

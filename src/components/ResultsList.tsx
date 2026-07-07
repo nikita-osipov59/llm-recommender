@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModelCard from "./ModelCard";
 
@@ -21,23 +20,12 @@ interface Props {
   models: ModelData[];
   loading: boolean;
   error?: string;
+  selectedSlugs: Set<string>;
+  onToggle: (slug: string) => void;
 }
 
-export default function ResultsList({ models, loading, error }: Props) {
+export default function ResultsList({ models, loading, error, selectedSlugs, onToggle }: Props) {
   const router = useRouter();
-  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
-
-  const handleToggle = (slug: string) => {
-    setSelectedSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) {
-        next.delete(slug);
-      } else {
-        next.add(slug);
-      }
-      return next;
-    });
-  };
 
   if (loading) {
     return (
@@ -88,7 +76,7 @@ export default function ResultsList({ models, loading, error }: Props) {
           key={model.slug}
           model={model}
           selected={selectedSlugs.has(model.slug)}
-          onToggle={handleToggle}
+           onToggle={onToggle}
         />
       ))}
     </div>
