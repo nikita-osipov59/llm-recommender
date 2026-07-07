@@ -68,11 +68,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const filtered = models.filter((m) => {
-      if (vram > 0 && m.vramQ4 !== null && m.vramQ4 > vram) return false;
-      if (ram > 0 && m.ramMin !== null && m.ramMin > ram) return false;
-      return true;
-    });
+    const filtered = models
+      .filter((m) => {
+        if (vram > 0 && m.vramQ4 !== null && m.vramQ4 > vram) return false;
+        if (ram > 0 && m.ramMin !== null && m.ramMin > ram) return false;
+        return true;
+      })
+      .sort((a, b) => b.parameters - a.parameters);
 
     return NextResponse.json({ models: filtered.slice(0, 50), cached });
   } catch (err) {
