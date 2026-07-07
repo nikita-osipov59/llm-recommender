@@ -1,5 +1,8 @@
-import { PrismaClient } from "../src/generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
+
+const __dbUrl = process.env.DATABASE_URL || "";
+
+import { PrismaClient } from "../src/generated/prisma/client";
 
 const APPLE_GPUS = [
   { name: "Apple M1 (7 GPU cores)", vramGb: 7, vendor: "Apple" },
@@ -20,11 +23,28 @@ const APPLE_GPUS = [
 const CSV_URL =
   "https://raw.githubusercontent.com/RonnyMuthomi/GPUs-Specs/main/gpu_1986-2026.csv";
 
-async function main() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-  const prisma = new PrismaClient({ adapter });
+const dbUrl = process.env.DATABASE_URL || "";
+const isSqlite = dbUrl.startsWith("file:") || dbUrl.startsWith("libsql:");
 
-  // Seed Apple GPUs
+async function createDatabaseClient() {
+  if (isSqlite) {
+    const { PrismaLibSql } = await import("@prisma/adapter-libsql");
+    const adapter = new PrismaLibSql({ url: dbUrl });
+    return new PrismaClient({ adapter });
+  }
+  const { PrismaPg } = await import("@prisma/adapter-pg");
+  const pg = await import("pg");
+  const pool = new pg.default.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+  const adapter = new PrismaPg(pool);
+  return new PrismaClient({ adapter });
+}
+
+async function main() {
+  const prisma = await createDatabaseClient();
+
   for (const gpu of APPLE_GPUS) {
     await prisma.gpu.upsert({
       where: { name: gpu.name },
@@ -34,7 +54,6 @@ async function main() {
   }
   console.log(`Seeded ${APPLE_GPUS.length} Apple GPUs`);
 
-  // Try to fetch and seed CSV GPUs
   try {
     const res = await fetch(CSV_URL, {
       headers: { "User-Agent": "llm-recommender/1.0" },

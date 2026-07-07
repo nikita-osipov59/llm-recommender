@@ -9,11 +9,15 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "local": "node scripts/use-local-db.cjs && next dev",
     "postinstall": "prisma generate && node scripts/postinstall.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "better-sqlite3": "^12.11.1",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "pg": "^8.22.0",
