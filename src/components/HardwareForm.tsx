@@ -93,10 +93,11 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
       const renderer = (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string) || "";
 
       let matched: GpuEntry | null = null;
+      let maxLen = 0;
       for (const g of gpus) {
-        if (renderer.toLowerCase().includes(g.name.toLowerCase())) {
+        if (renderer.toLowerCase().includes(g.name.toLowerCase()) && g.name.length > maxLen) {
           matched = g;
-          break;
+          maxLen = g.name.length;
         }
       }
 
