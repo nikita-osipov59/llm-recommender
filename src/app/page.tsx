@@ -5,6 +5,7 @@ import HardwareForm from "@/components/HardwareForm";
 import ResultsList from "@/components/ResultsList";
 import ScrollToTop from "@/components/ScrollToTop";
 import ThemeToggle from "@/components/ThemeToggle";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 interface ModelData {
   slug: string;
@@ -118,6 +119,7 @@ export default function Home() {
   };
 
   return (
+    <ErrorBoundary>
     <main className="max-w-3xl mx-auto px-4 py-8">
       <header className="mb-8 flex items-start justify-between">
         <div>
@@ -151,5 +153,6 @@ export default function Home() {
       </section>
       <ScrollToTop />
     </main>
+    </ErrorBoundary>
   );
 }
