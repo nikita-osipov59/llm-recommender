@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import HardwareForm from "@/components/HardwareForm";
 import ResultsList from "@/components/ResultsList";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface ModelData {
   slug: string;
@@ -142,6 +143,7 @@ export default function Home() {
           />
         )}
       </section>
+      <ScrollToTop />
     </main>
   );
 }
