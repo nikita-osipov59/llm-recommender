@@ -32,6 +32,7 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
   const [gpus, setGpus] = useState<GpuEntry[]>([]);
   const [gpusLoading, setGpusLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const [detecting, setDetecting] = useState(false);
 
   useEffect(() => { setHydrated(true); }, []);
 
@@ -79,6 +80,40 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
       vram: Number(formValues.vram) || 0,
       ram: Number(formValues.ram) || 0,
     });
+  };
+
+  const handleDetect = async () => {
+    setDetecting(true);
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl");
+      if (!gl) return;
+      const ext = gl.getExtension("WEBGL_debug_renderer_info");
+      if (!ext) return;
+      const renderer = (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string) || "";
+
+      let matched: GpuEntry | null = null;
+      for (const g of gpus) {
+        if (renderer.toLowerCase().includes(g.name.toLowerCase())) {
+          matched = g;
+          break;
+        }
+      }
+
+      const ram = (navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 0;
+
+      if (matched) {
+        onFormChange({
+          gpu: `${matched.vendor} ${matched.name} (${matched.vramGb}GB)`,
+          vram: String(matched.vramGb),
+          ram: String(ram),
+          vendor: matched.vendor,
+        });
+      }
+    } catch {
+    } finally {
+      setDetecting(false);
+    }
   };
 
   return (
@@ -159,6 +194,14 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
           className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition cursor-pointer"
         >
           {loading ? "Поиск..." : "Подобрать модель"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDetect}
+          disabled={loading || detecting}
+          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
+        >
+          {detecting ? "Определение..." : "Определить авто"}
         </button>
         <button
           type="button"
