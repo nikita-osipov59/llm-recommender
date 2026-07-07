@@ -32,11 +32,14 @@ type SortKey = "parameters" | "vramQ4" | "downloads";
 const QUANT_LABELS: Record<QuantFilter, string> = { all: "Все", q4: "Q4", q8: "Q8" };
 const SORT_LABELS: Record<SortKey, string> = { parameters: "По параметрам", vramQ4: "По VRAM (Q4)", downloads: "По загрузкам" };
 
+const PAGE_SIZE = 20;
+
 export default function ResultsList({ models, loading, error, selectedSlugs, onToggle }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [quantFilter, setQuantFilter] = useState<QuantFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("parameters");
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
     let result = models.filter((m) =>
@@ -47,6 +50,12 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
     result.sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0));
     return result;
   }, [models, search, quantFilter, sortKey]);
+
+  const visible = useMemo(() => filtered.slice(0, displayCount), [filtered, displayCount]);
+
+  function handleSearch(value: string) { setSearch(value); setDisplayCount(PAGE_SIZE); }
+  function handleQuantFilter(value: QuantFilter) { setQuantFilter(value); setDisplayCount(PAGE_SIZE); }
+  function handleSortKey(value: SortKey) { setSortKey(value); setDisplayCount(PAGE_SIZE); }
 
   if (loading) {
     return (
@@ -96,7 +105,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
       <input
         type="search"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
         placeholder="Поиск по названию..."
         className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
       />
@@ -106,7 +115,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
           {(Object.keys(QUANT_LABELS) as QuantFilter[]).map((key) => (
             <button
               key={key}
-              onClick={() => setQuantFilter(key)}
+              onClick={() => handleQuantFilter(key)}
               className={`text-sm px-3 py-1 rounded-md transition cursor-pointer ${
                 quantFilter === key
                   ? "bg-white dark:bg-gray-600 shadow-sm font-medium"
@@ -119,7 +128,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
         </div>
         <select
           value={sortKey}
-          onChange={(e) => setSortKey(e.target.value as SortKey)}
+          onChange={(e) => handleSortKey(e.target.value as SortKey)}
           className="text-sm border rounded-lg p-1.5 dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
         >
           {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
@@ -132,7 +141,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
         <p className="text-center py-8 text-gray-400 text-sm">Ничего не найдено</p>
       )}
 
-      {filtered.map((model) => (
+      {visible.map((model) => (
         <ModelCard
           key={model.slug}
           model={model}
@@ -140,6 +149,15 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
           onToggle={onToggle}
         />
       ))}
+
+      {displayCount < filtered.length && (
+        <button
+          onClick={() => setDisplayCount((c) => c + PAGE_SIZE)}
+          className="w-full text-sm py-2 border rounded-lg dark:border-gray-700 text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
+        >
+          Загрузить ещё ({filtered.length - displayCount})
+        </button>
+      )}
     </div>
   );
 }
