@@ -33,6 +33,9 @@ interface Props {
 export default function HardwareForm({ onRecommend, loading, formValues, onFormChange }: Props) {
   const [gpus, setGpus] = useState<GpuEntry[]>([]);
   const [gpusLoading, setGpusLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => { setHydrated(true); }, []);
 
   useEffect(() => {
     fetch("/api/gpus")
@@ -128,9 +131,9 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
           type="number"
           value={formValues.vram}
           onChange={(e) => onFormChange({ ...formValues, vram: e.target.value })}
-          readOnly={!!formValues.gpu}
+          readOnly={hydrated && !!formValues.gpu}
           placeholder="Например: 16"
-          className={`w-full border rounded-lg p-2 dark:border-gray-700 ${formValues.gpu ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : "dark:bg-gray-800"}`}
+          className={`w-full border rounded-lg p-2 dark:border-gray-700 ${hydrated && formValues.gpu ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : "dark:bg-gray-800"}`}
           required
           min="1"
           step="0.1"
