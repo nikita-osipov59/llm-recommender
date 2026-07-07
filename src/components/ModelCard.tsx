@@ -60,7 +60,7 @@ export default function ModelCard({ model, selected, onToggle, userVram, isBest,
               className="text-lg leading-none cursor-pointer shrink-0 hover:scale-110 transition"
               title={favorited ? "Убрать из избранного" : "Добавить в избранное"}
             >
-              <Bookmark size={16} className={favorited ? "text-yellow-400" : "text-gray-400"} />
+              <Bookmark size={16} className={!favorited ? "text-gray-400" : ""} />
             </button>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
