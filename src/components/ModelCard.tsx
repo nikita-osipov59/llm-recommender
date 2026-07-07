@@ -20,19 +20,23 @@ interface ModelCardProps {
 export default function ModelCard({ model, selected, onToggle }: ModelCardProps) {
   return (
     <div className="border rounded-lg p-4 dark:border-gray-700 dark:bg-gray-800 hover:shadow-md transition">
-      <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={() => onToggle(model.slug)}
-          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-        <div className="flex-1">
+      <div className="flex items-start justify-between gap-3">
+        <div>
           <h3 className="font-semibold text-lg">{model.name}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {model.provider} • {model.parameters}B параметров
           </p>
         </div>
+        <button
+          onClick={() => onToggle(model.slug)}
+          className={`text-sm font-medium py-1 px-3 rounded-lg border transition whitespace-nowrap ${
+            selected
+              ? "bg-blue-600 text-white border-blue-600"
+              : "border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          }`}
+        >
+          {selected ? "В сравнении ✓" : "Сравнить"}
+        </button>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
