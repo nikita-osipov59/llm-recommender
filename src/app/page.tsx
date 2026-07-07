@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import HardwareForm from "@/components/HardwareForm";
 import ResultsList from "@/components/ResultsList";
 
@@ -36,32 +36,26 @@ interface SessionState {
 
 const STORAGE_KEY = "llm-recommender-search";
 
+function loadSession(): SessionState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
 export default function Home() {
-  const [models, setModels] = useState<ModelData[]>([]);
+  const initial = loadSession();
+
+  const [models, setModels] = useState<ModelData[]>(initial?.models ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const [hasSearched, setHasSearched] = useState(false);
-  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
-  const [formGpu, setFormGpu] = useState("");
-  const [formVram, setFormVram] = useState("");
-  const [formRam, setFormRam] = useState("");
-  const [formCpu, setFormCpu] = useState("");
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved: SessionState = JSON.parse(raw);
-        setModels(saved.models);
-        setSelectedSlugs(new Set(saved.selectedSlugs));
-        setHasSearched(saved.hasSearched);
-        if (saved.formGpu) setFormGpu(saved.formGpu);
-        if (saved.formVram) setFormVram(saved.formVram);
-        if (saved.formRam) setFormRam(saved.formRam);
-        if (saved.formCpu) setFormCpu(saved.formCpu);
-      }
-    } catch {}
-  }, []);
+  const [hasSearched, setHasSearched] = useState(initial?.hasSearched ?? false);
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set(initial?.selectedSlugs));
+  const [formGpu, setFormGpu] = useState(initial?.formGpu ?? "");
+  const [formVram, setFormVram] = useState(initial?.formVram ?? "");
+  const [formRam, setFormRam] = useState(initial?.formRam ?? "");
+  const [formCpu, setFormCpu] = useState(initial?.formCpu ?? "");
 
   useEffect(() => {
     const state: SessionState = {
@@ -83,6 +77,13 @@ export default function Home() {
       else next.add(slug);
       return next;
     });
+  }, []);
+
+  const handleFormChange = useCallback((v: { gpu: string; vram: string; ram: string; cpu: string }) => {
+    setFormGpu(v.gpu);
+    setFormVram(v.vram);
+    setFormRam(v.ram);
+    setFormCpu(v.cpu);
   }, []);
 
   const handleRecommend = async (spec: HardwareSpec) => {
@@ -125,13 +126,8 @@ export default function Home() {
         <HardwareForm
           onRecommend={handleRecommend}
           loading={loading}
-          initialValues={{ gpu: formGpu, vram: formVram, ram: formRam, cpu: formCpu }}
-          onFormChange={(v) => {
-            setFormGpu(v.gpu);
-            setFormVram(v.vram);
-            setFormRam(v.ram);
-            setFormCpu(v.cpu);
-          }}
+          formValues={{ gpu: formGpu, vram: formVram, ram: formRam, cpu: formCpu }}
+          onFormChange={handleFormChange}
         />
       </section>
 

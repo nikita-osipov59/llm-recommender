@@ -25,26 +25,13 @@ interface FormValues {
 interface Props {
   onRecommend: (spec: HardwareSpec) => void;
   loading: boolean;
-  initialValues?: FormValues;
-  onFormChange?: (values: FormValues) => void;
+  formValues: FormValues;
+  onFormChange: (values: FormValues) => void;
 }
 
-export default function HardwareForm({ onRecommend, loading, initialValues, onFormChange }: Props) {
+export default function HardwareForm({ onRecommend, loading, formValues, onFormChange }: Props) {
   const [gpus, setGpus] = useState<GpuEntry[]>([]);
   const [gpusLoading, setGpusLoading] = useState(true);
-  const [gpu, setGpu] = useState("");
-  const [vram, setVram] = useState("");
-  const [ram, setRam] = useState("");
-  const [cpu, setCpu] = useState("");
-
-  useEffect(() => {
-    if (initialValues) {
-      setGpu(initialValues.gpu);
-      setVram(initialValues.vram);
-      setRam(initialValues.ram);
-      setCpu(initialValues.cpu);
-    }
-  }, []);
 
   useEffect(() => {
     fetch("/api/gpus")
@@ -56,28 +43,24 @@ export default function HardwareForm({ onRecommend, loading, initialValues, onFo
       .finally(() => setGpusLoading(false));
   }, []);
 
-  useEffect(() => {
-    onFormChange?.({ gpu, vram: vram || "", ram: ram || "", cpu });
-  }, [gpu, vram, ram, cpu, onFormChange]);
-
   const handleGpuChange = (value: string) => {
-    setGpu(value);
     const gpuData = gpus.find((g) => `${g.vendor} ${g.name}` === value);
     if (gpuData) {
-      setVram(String(gpuData.vramGb));
+      onFormChange({ ...formValues, gpu: value, vram: String(gpuData.vramGb) });
     } else {
       const match = value.match(/(\d+)\s*GB/);
-      if (match) setVram(match[1]);
+      if (match) onFormChange({ ...formValues, gpu: value, vram: match[1] });
+      else onFormChange({ ...formValues, gpu: value });
     }
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onRecommend({
-      gpu,
-      vram: Number(vram) || 0,
-      ram: Number(ram) || 0,
-      cpu,
+      gpu: formValues.gpu,
+      vram: Number(formValues.vram) || 0,
+      ram: Number(formValues.ram) || 0,
+      cpu: formValues.cpu,
     });
   };
 
@@ -86,7 +69,7 @@ export default function HardwareForm({ onRecommend, loading, initialValues, onFo
       <div>
         <label className="block text-sm font-medium mb-1">Видеокарта (GPU)</label>
         <select
-          value={gpu}
+          value={formValues.gpu}
           onChange={(e) => handleGpuChange(e.target.value)}
           className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
           disabled={gpusLoading}
@@ -111,8 +94,8 @@ export default function HardwareForm({ onRecommend, loading, initialValues, onFo
         </label>
         <input
           type="number"
-          value={vram}
-          onChange={(e) => setVram(e.target.value)}
+          value={formValues.vram}
+          onChange={(e) => onFormChange({ ...formValues, vram: e.target.value })}
           placeholder="Например: 16"
           className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
           required
@@ -127,8 +110,8 @@ export default function HardwareForm({ onRecommend, loading, initialValues, onFo
         </label>
         <input
           type="number"
-          value={ram}
-          onChange={(e) => setRam(e.target.value)}
+          value={formValues.ram}
+          onChange={(e) => onFormChange({ ...formValues, ram: e.target.value })}
           placeholder="Например: 32"
           className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
           required
@@ -140,8 +123,8 @@ export default function HardwareForm({ onRecommend, loading, initialValues, onFo
         <label className="block text-sm font-medium mb-1">Процессор (CPU) — необязательно</label>
         <input
           type="text"
-          value={cpu}
-          onChange={(e) => setCpu(e.target.value)}
+          value={formValues.cpu}
+          onChange={(e) => onFormChange({ ...formValues, cpu: e.target.value })}
           placeholder="Например: Ryzen 7 9800X3D"
           className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700"
         />
