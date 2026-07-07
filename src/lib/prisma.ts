@@ -1,9 +1,9 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { Pool } from "@neondatabase/serverless";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaNeon(pool);
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 

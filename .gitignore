@@ -53,3 +53,6 @@ next-env.d.ts
 
 # superpowers sdd artifacts
 .superpowers/
+
+.vercel
+.env*

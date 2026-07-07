@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postinstall": "prisma generate && prisma db push --skip-generate --accept-data-loss"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "better-sqlite3": "^12.11.1",
     "lucide-react": "^1.23.0",
