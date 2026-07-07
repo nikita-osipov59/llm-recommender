@@ -29,7 +29,7 @@ export default function ModelCard({ model, selected, onToggle }: ModelCardProps)
         </div>
         <button
           onClick={() => onToggle(model.slug)}
-          className={`text-sm font-medium py-1 px-3 rounded-lg border transition whitespace-nowrap ${
+          className={`text-sm font-medium py-1 px-3 rounded-lg border transition whitespace-nowrap cursor-pointer ${
             selected
               ? "bg-blue-600 text-white border-blue-600"
               : "border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"

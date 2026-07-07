@@ -59,16 +59,18 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
         <p className="text-sm text-gray-500">
           Найдено моделей: {models.length}
         </p>
-        {selectedSlugs.size >= 2 && (
-          <button
-            onClick={() =>
-              router.push("/compare?slugs=" + [...selectedSlugs].join(","))
-            }
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition"
-          >
-            Сравнить ({selectedSlugs.size})
-          </button>
-        )}
+        <button
+          onClick={() =>
+            router.push("/compare?slugs=" + [...selectedSlugs].join(","))
+          }
+          className={`text-sm font-medium py-1.5 px-3 rounded-lg border transition whitespace-nowrap ${
+            selectedSlugs.size >= 2
+              ? "bg-blue-600 text-white border-blue-600 visible"
+              : "border-transparent text-transparent invisible"
+          } cursor-pointer`}
+        >
+          Сравнить ({selectedSlugs.size})
+        </button>
       </div>
 
       {models.map((model) => (

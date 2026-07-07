@@ -134,7 +134,7 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition"
+          className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition cursor-pointer"
         >
           {loading ? "Поиск..." : "Подобрать модель"}
         </button>
@@ -142,7 +142,7 @@ export default function HardwareForm({ onRecommend, loading, formValues, onFormC
           type="button"
           onClick={() => onFormChange({ gpu: "", vram: "", ram: "", cpu: "" })}
           disabled={loading}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50"
+          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
         >
           Очистить
         </button>
