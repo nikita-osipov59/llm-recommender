@@ -69,8 +69,9 @@ function Row({ label, values, isLink, urls }: {
   isLink?: boolean;
   urls?: (string | null)[];
 }) {
+  const allMatch = new Set(values).size === 1;
   return (
-    <tr className="border-b dark:border-gray-700 even:bg-gray-50 dark:even:bg-gray-800/50">
+    <tr className={`border-b dark:border-gray-700 even:bg-gray-50 dark:even:bg-gray-800/50 ${allMatch ? "bg-green-50 dark:bg-green-900/20 even:bg-green-50 dark:even:bg-green-900/20" : ""}`}>
       <td className="px-4 py-2 text-gray-500 dark:text-gray-400 font-medium">{label}</td>
       {values.map((val, i) => (
         <td key={i} className="px-4 py-2">
