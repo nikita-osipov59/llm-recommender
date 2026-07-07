@@ -49,6 +49,9 @@ function loadSession(): SessionState | null {
 export default function Home() {
   const initial = loadSession();
 
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
+
   const [models, setModels] = useState<ModelData[]>(initial?.models ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -137,7 +140,7 @@ export default function Home() {
       </section>
 
       <section>
-        {hasSearched && (
+        {hydrated && hasSearched && (
           <ResultsList
             models={models}
             loading={loading}
