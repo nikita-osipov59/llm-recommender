@@ -1,50 +1,10 @@
 import { NextResponse } from "next/server";
-import { getGpus, refreshGpuDatabase } from "@/lib/gpuDatabase";
-import { prisma } from "@/lib/prisma";
+import { getGpus } from "@/lib/gpuDatabase";
 
-const APPLE_GPUS = [
-  { name: "Apple M1 (7 GPU cores)", vramGb: 7, vendor: "Apple" },
-  { name: "Apple M1 (8 GPU cores)", vramGb: 8, vendor: "Apple" },
-  { name: "Apple M1 Pro (14 GPU cores)", vramGb: 14, vendor: "Apple" },
-  { name: "Apple M1 Max (32 GPU cores)", vramGb: 32, vendor: "Apple" },
-  { name: "Apple M2 (8 GPU cores)", vramGb: 8, vendor: "Apple" },
-  { name: "Apple M2 Pro (19 GPU cores)", vramGb: 19, vendor: "Apple" },
-  { name: "Apple M2 Max (38 GPU cores)", vramGb: 38, vendor: "Apple" },
-  { name: "Apple M3 (10 GPU cores)", vramGb: 10, vendor: "Apple" },
-  { name: "Apple M3 Pro (18 GPU cores)", vramGb: 18, vendor: "Apple" },
-  { name: "Apple M3 Max (40 GPU cores)", vramGb: 40, vendor: "Apple" },
-  { name: "Apple M4 (10 GPU cores)", vramGb: 10, vendor: "Apple" },
-  { name: "Apple M4 Pro (20 GPU cores)", vramGb: 20, vendor: "Apple" },
-  { name: "Apple M4 Max (40 GPU cores)", vramGb: 40, vendor: "Apple" },
-];
-
-async function seedAppleGpus() {
-  for (const gpu of APPLE_GPUS) {
-    await prisma.gpu.upsert({
-      where: { name: gpu.name },
-      update: { vramGb: gpu.vramGb, vendor: gpu.vendor },
-      create: { name: gpu.name, vramGb: gpu.vramGb, vendor: gpu.vendor },
-    });
-  }
-}
-
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const url = new URL(req.url);
-    const force = url.searchParams.get("refresh") === "1";
-
-    if (force) {
-      await prisma.gpu.deleteMany({ where: { vendor: { not: "Apple" } } });
-    }
-
     const gpus = await getGpus();
-    await seedAppleGpus();
-
-    const allGpus = await prisma.gpu.findMany({
-      orderBy: [{ vendor: "asc" }, { vramGb: "desc" }],
-    });
-
-    return NextResponse.json({ gpus: allGpus });
+    return NextResponse.json({ gpus });
   } catch (err) {
     console.error("/api/gpus error:", err);
     return NextResponse.json(
