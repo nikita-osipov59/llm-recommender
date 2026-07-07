@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ArrowUp } from "lucide-react";
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -19,7 +20,7 @@ export default function ScrollToTop() {
       className="fixed bottom-6 right-6 w-10 h-10 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition z-50"
       aria-label="Наверх"
     >
-      ↑
+      <ArrowUp size={18} />
     </button>
   );
 }

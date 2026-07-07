@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ModelCard from "./ModelCard";
 import SkeletonCard from "./SkeletonCard";
+import { Star } from "lucide-react";
 
 interface ModelData {
   slug: string;
@@ -221,7 +222,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
-              ★ {favorites.size}
+              <Star size={14} className="inline fill-yellow-400" /> {favorites.size}
             </button>
           </div>
         )}

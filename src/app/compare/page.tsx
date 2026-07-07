@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ComparisonTable from "@/components/ComparisonTable";
+import { ArrowLeft } from "lucide-react";
 
 export default async function ComparePage({
   searchParams,
@@ -25,7 +26,7 @@ export default async function ComparePage({
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-        ← Назад к поиску
+        <ArrowLeft size={14} className="inline mr-1" /> Назад к поиску
       </Link>
 
       {slugList.length === 0 && (

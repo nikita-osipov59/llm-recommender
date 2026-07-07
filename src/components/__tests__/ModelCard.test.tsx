@@ -28,7 +28,7 @@ it("renders model info and calls onToggle", async () => {
 
 it("shows comparison state when selected", () => {
   render(<ModelCard model={model} selected={true} onToggle={vi.fn()} userVram={0} isBest={false} favorited={false} onFavorite={vi.fn()} />);
-  expect(screen.getByText("В сравнении ✓")).toBeInTheDocument();
+  expect(screen.getByText("В сравнении")).toBeInTheDocument();
 });
 
 it("renders link to model detail page", () => {

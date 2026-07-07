@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -15,7 +16,7 @@ export default async function ModelPage({ params }: Props) {
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-        ← Назад к поиску
+        <ArrowLeft size={14} className="inline mr-1" /> Назад к поиску
       </Link>
 
       <div className="mt-6 space-y-6">
@@ -44,7 +45,7 @@ export default async function ModelPage({ params }: Props) {
             rel="noopener noreferrer"
             className="inline-block text-blue-600 dark:text-blue-400 hover:underline"
           >
-            Открыть на HuggingFace →
+            Открыть на HuggingFace <ExternalLink size={14} className="inline ml-1" />
           </a>
         )}
       </div>

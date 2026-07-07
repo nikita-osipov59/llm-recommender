@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Star, Check, ExternalLink } from "lucide-react";
 
 interface ModelData {
   slug: string;
@@ -59,7 +60,7 @@ export default function ModelCard({ model, selected, onToggle, userVram, isBest,
               className="text-lg leading-none cursor-pointer shrink-0 hover:scale-110 transition"
               title={favorited ? "Убрать из избранного" : "Добавить в избранное"}
             >
-              {favorited ? "★" : "☆"}
+              <Star size={16} className={favorited ? "fill-yellow-400" : "text-gray-400"} />
             </button>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -74,7 +75,7 @@ export default function ModelCard({ model, selected, onToggle, userVram, isBest,
               : "border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
           }`}
         >
-          {selected ? "В сравнении ✓" : "Сравнить"}
+          {selected ? <>В сравнении <Check size={14} className="inline" /></> : "Сравнить"}
         </button>
       </div>
 
@@ -128,7 +129,7 @@ export default function ModelCard({ model, selected, onToggle, userVram, isBest,
           rel="noopener noreferrer"
           className="inline-block mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
-          Открыть на HuggingFace →
+          Открыть на HuggingFace <ExternalLink size={14} className="inline" />
         </a>
       )}
     </div>
