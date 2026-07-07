@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface ModelData {
   slug: string;
   name: string;
@@ -22,7 +24,9 @@ export default function ModelCard({ model, selected, onToggle }: ModelCardProps)
     <div className="border rounded-lg p-4 dark:border-gray-700 dark:bg-gray-800 hover:shadow-md transition">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-lg">{model.name}</h3>
+          <Link href={"/models/" + model.slug} className="hover:underline">
+            <h3 className="font-semibold text-lg">{model.name}</h3>
+          </Link>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {model.provider} • {model.parameters}B параметров
           </p>
