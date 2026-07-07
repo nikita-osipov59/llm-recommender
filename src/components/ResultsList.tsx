@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ModelCard from "./ModelCard";
+import SkeletonCard from "./SkeletonCard";
 
 interface ModelData {
   slug: string;
@@ -26,12 +28,17 @@ interface Props {
 
 export default function ResultsList({ models, loading, error, selectedSlugs, onToggle }: Props) {
   const router = useRouter();
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(
+    () => models.filter((m) => m.name.toLowerCase().includes(search.toLowerCase())),
+    [models, search]
+  );
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
-        <p className="mt-4 text-gray-500">Ищем подходящие модели...</p>
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
       </div>
     );
   }
@@ -57,7 +64,7 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">
-          Найдено моделей: {models.length}
+          Найдено моделей: {filtered.length}
         </p>
         <button
           onClick={() =>
@@ -73,12 +80,24 @@ export default function ResultsList({ models, loading, error, selectedSlugs, onT
         </button>
       </div>
 
-      {models.map((model) => (
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Поиск по названию..."
+        className="w-full border rounded-lg p-2 dark:bg-gray-800 dark:border-gray-700 text-sm"
+      />
+
+      {filtered.length === 0 && (
+        <p className="text-center py-8 text-gray-400 text-sm">Ничего не найдено</p>
+      )}
+
+      {filtered.map((model) => (
         <ModelCard
           key={model.slug}
           model={model}
           selected={selectedSlugs.has(model.slug)}
-           onToggle={onToggle}
+          onToggle={onToggle}
         />
       ))}
     </div>
