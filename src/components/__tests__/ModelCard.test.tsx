@@ -17,7 +17,7 @@ const model = {
 
 it("renders model info and calls onToggle", async () => {
   const onToggle = vi.fn();
-  render(<ModelCard model={model} selected={false} onToggle={onToggle} />);
+  render(<ModelCard model={model} selected={false} onToggle={onToggle} userVram={0} isBest={false} favorited={false} onFavorite={vi.fn()} />);
   expect(screen.getByText("Llama 3 8B")).toBeInTheDocument();
   expect(screen.getByText(/Meta/)).toBeInTheDocument();
   expect(screen.getByText("6 ГБ")).toBeInTheDocument();
@@ -27,12 +27,12 @@ it("renders model info and calls onToggle", async () => {
 });
 
 it("shows comparison state when selected", () => {
-  render(<ModelCard model={model} selected={true} onToggle={vi.fn()} />);
+  render(<ModelCard model={model} selected={true} onToggle={vi.fn()} userVram={0} isBest={false} favorited={false} onFavorite={vi.fn()} />);
   expect(screen.getByText("В сравнении ✓")).toBeInTheDocument();
 });
 
 it("renders link to model detail page", () => {
-  render(<ModelCard model={model} selected={false} onToggle={vi.fn()} />);
+  render(<ModelCard model={model} selected={false} onToggle={vi.fn()} userVram={0} isBest={false} favorited={false} onFavorite={vi.fn()} />);
   const link = screen.getByRole("link", { name: "Llama 3 8B" });
   expect(link).toHaveAttribute("href", "/models/llama-3-8b");
 });

@@ -18,6 +18,7 @@ interface ModelData {
   hfUrl: string | null;
   downloads: number;
   description: string | null;
+  tags?: string | null;
 }
 
 interface HardwareSpec {
@@ -148,6 +149,7 @@ export default function Home() {
             error={error}
             selectedSlugs={selectedSlugs}
             onToggle={handleToggle}
+            userVram={Number(formVram) || 0}
           />
         )}
       </section>

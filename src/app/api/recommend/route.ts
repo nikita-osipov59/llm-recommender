@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
             cpuRec: null,
             hfUrl: hf.hfUrl,
             downloads: hf.downloads,
-            tags: null,
+            tags: hf.tags,
           };
 
           if (existing) {

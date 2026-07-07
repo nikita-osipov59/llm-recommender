@@ -6,6 +6,18 @@ export interface HFModelResult {
   downloads: number;
   hfUrl: string;
   description: string;
+  tags: string;
+}
+
+function inferTags(id: string): string[] {
+  const n = id.toLowerCase();
+  const tags: string[] = [];
+  if (/\b(instruct|chat)\b/.test(n)) tags.push("chat");
+  if (/\bcode\b/.test(n)) tags.push("coding");
+  if (/\bvision\b/.test(n)) tags.push("vision");
+  if (/\breasoning\b/.test(n)) tags.push("reasoning");
+  if (/\bmath\b/.test(n)) tags.push("math");
+  return tags;
 }
 
 const HF_API = "https://huggingface.co/api/models";
@@ -64,6 +76,7 @@ export async function getModelsFromHF(): Promise<HFModelResult[]> {
         downloads: model.downloads || 0,
         hfUrl: `https://huggingface.co/${model.id}`,
         description: model.cardData?.description || "",
+        tags: inferTags(model.id).join(","),
       });
     }
   }
