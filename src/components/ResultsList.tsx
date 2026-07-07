@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import ModelCard from "./ModelCard";
+import ComparisonTable from "./ComparisonTable";
 
 interface ModelData {
   slug: string;
@@ -20,6 +24,22 @@ interface Props {
 }
 
 export default function ResultsList({ models, loading, error }: Props) {
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+  const [showComparison, setShowComparison] = useState(false);
+
+  const handleToggle = (slug: string) => {
+    setSelectedSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) {
+        next.delete(slug);
+      } else {
+        next.add(slug);
+      }
+      return next;
+    });
+    setShowComparison(false);
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -48,12 +68,35 @@ export default function ResultsList({ models, loading, error }: Props) {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-500">
-        Найдено моделей: {models.length}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500">
+          Найдено моделей: {models.length}
+        </p>
+        {selectedSlugs.size >= 2 && !showComparison && (
+          <button
+            onClick={() => setShowComparison(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition"
+          >
+            Сравнить ({selectedSlugs.size})
+          </button>
+        )}
+      </div>
+
       {models.map((model) => (
-        <ModelCard key={model.slug} model={model} />
+        <ModelCard
+          key={model.slug}
+          model={model}
+          selected={selectedSlugs.has(model.slug)}
+          onToggle={handleToggle}
+        />
       ))}
+
+      {showComparison && selectedSlugs.size >= 2 && (
+        <ComparisonTable
+          models={models.filter((m) => selectedSlugs.has(m.slug))}
+          onClose={() => setShowComparison(false)}
+        />
+      )}
     </div>
   );
 }

@@ -11,11 +11,23 @@ interface ModelData {
   description: string | null;
 }
 
-export default function ModelCard({ model }: { model: ModelData }) {
+interface ModelCardProps {
+  model: ModelData;
+  selected: boolean;
+  onToggle: (slug: string) => void;
+}
+
+export default function ModelCard({ model, selected, onToggle }: ModelCardProps) {
   return (
     <div className="border rounded-lg p-4 dark:border-gray-700 dark:bg-gray-800 hover:shadow-md transition">
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggle(model.slug)}
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <div className="flex-1">
           <h3 className="font-semibold text-lg">{model.name}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {model.provider} • {model.parameters}B параметров
